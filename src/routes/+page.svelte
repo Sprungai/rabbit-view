@@ -93,4 +93,4 @@
 	</div>
 </dialog>
 
-<RabbitForm></RabbitForm>
+<button class="btn btn-primary"><a href="/add">New Rabbits</a></button>
