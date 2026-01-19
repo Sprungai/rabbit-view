@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { pb, store } from '$lib/store.svelte.js';
 
+	let { rabbitId = '' } = $props();
+
 	let rabbit = $state({
 		name: 'New Name',
 		rabbithole: ''
@@ -16,13 +18,29 @@
 		goto('/');
 	}
 
+	async function saveChanges() {
+		await store.editRabbit(rabbitId, rabbit);
+		goto('/');
+	}
+
 	$effect(async () => {
 		rabbitholes = await pb.collection('rabbitholes').getFullList();
+		if (rabbitId) {
+			rabbit = Object.assign(
+				{},
+				store.rabbits.find((rabbit) => rabbitId === rabbit.id)
+			);
+		}
 	});
 </script>
 
 <div class="flex flex-col gap-2">
-	<h1 class="text-lg font-bold">Add a Rabbit</h1>
+	{#if rabbitId}
+		<h1 class="text-lg font-bold">Edit rabbit with ID {rabbitId}</h1>
+	{:else}
+		<h1 class="text-lg font-bold">Add a Rabbit</h1>
+	{/if}
+
 	<label class="input">
 		<span class="label">Name</span>
 		<input type="text" class="grow" bind:value={rabbit.name} />
@@ -58,9 +76,17 @@
 		</div>
 	{/if}
 
-	<button
-		class="btn btn-primary"
-		onclick={addRabbit}
-		disabled={wrongRabbitName || rabbit.name.length === 0}>Add Rabbit!</button
-	>
+	{#if rabbitId}
+		<button
+			class="btn btn-primary"
+			onclick={saveChanges}
+			disabled={wrongRabbitName || rabbit.name.length === 0}>Save Changes!</button
+		>
+	{:else}
+		<button
+			class="btn btn-primary"
+			onclick={addRabbit}
+			disabled={wrongRabbitName || rabbit.name.length === 0}>Add Rabbit!</button
+		>
+	{/if}
 </div>
